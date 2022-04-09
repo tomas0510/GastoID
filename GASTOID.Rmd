@@ -1,7 +1,8 @@
 ---
 title: "Gasto I + D por Empresas en Chile"
+subtitle: "Organización Industrial"
 author: "Tomás Bustamante Hernández"
-date: "09-04-2022"
+date: "Invierno 2022"
 output: beamer_presentation
 ---
 
