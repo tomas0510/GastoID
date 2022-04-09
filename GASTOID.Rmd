@@ -3,34 +3,75 @@ title: "Gasto I + D por Empresas en Chile"
 subtitle: "Organización Industrial"
 author: "Tomás Bustamante Hernández"
 date: "Invierno 2022"
-output: beamer_presentation
+output: 
+  beamer_presentation:
+     theme: "Singapore"
+     colortheme: "default"
+     fonttheme: "default"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## R Markdown
 
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r , echo=FALSE, message=FALSE, warning=FALSE}
+# descripción de variables
+library(tidyverse)
+library(readxl)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+desc.variables<-read_xlsx("2019-I-mas-D-descriptor-de-variables.xlsx")
 
-## Slide with Bullets
+view(desc.variables)
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
-
-## Slide with R Output
-
-```{r cars, echo = TRUE}
-summary(cars)
 ```
 
-## Slide with Plot
 
-```{r pressure}
-plot(pressure)
+## Evolución del gasto I+D respecto al PIB
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+id.pib<-read_xlsx("idpib.xlsx", sheet = 1)
+
+pib.total<- read_xlsx("idpib.xlsx", sheet = 2, col_types = "text")
+
+pib.total<-pib.total[1,] %>% 
+  gather(key = "...1", value = "Gasto Total" )
+
+pib.total$`Gasto Total`<- as.numeric(pib.total$`Gasto Total`)
+
+colnames(pib.total)[1]<- "anio"
+
+colnames(id.pib)<- c("anio", "porcentaje")
+
+
+
+id.respecto.pib<-left_join(id.pib, pib.total, "anio")
+
+id.respecto.pib<-id.respecto.pib %>% 
+  mutate(gastoID = porcentaje*`Gasto Total`)
+
+colnames(id.respecto.pib)[3]<-"gasto.total"
+
 ```
+
+
+```{r}
+
+ggplot(id.respecto.pib,aes(x = anio, group=1))+
+  geom_line(aes(y= gasto.total/100, group=1, colour="PIB Total"), size=1)+
+  geom_line(aes(y=gastoID,colour = "Gasto I + D" ), size=1)+ 
+  scale_color_manual("", 
+                     breaks = c("PIB Total", "Gasto I + D"),
+                     values = c("red", "blue"))+
+  scale_y_continuous(sec.axis = sec_axis(trans =~.*100,name = "PIB Total", labels = function(x) format(x, scientific = F)), labels = function(x) format(x, scientific = F))+
+  labs(x = "Año",y = "Gasto en I + D", title = "Gasto I + D respecto al PIB", caption = "Elaboración con datos del Banco Central y Min. Ciencia")
+
+```
+
+
+
+
+
 
