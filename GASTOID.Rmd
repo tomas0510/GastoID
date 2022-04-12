@@ -46,7 +46,6 @@ colnames(pib.total)[1]<- "anio"
 colnames(id.pib)<- c("anio", "porcentaje")
 
 
-
 id.respecto.pib<-left_join(id.pib, pib.total, "anio")
 
 id.respecto.pib<-id.respecto.pib %>% 
