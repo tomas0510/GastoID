@@ -21,8 +21,7 @@ library(tidyverse)
 library(readxl)
 
 desc.variables<-read_xlsx("2019-I-mas-D-descriptor-de-variables.xlsx")
-
-view(desc.variables)
+imasd<-read_xlsx("2019-I-mas-D-base-de-datos_sector-economico.xlsx")
 
 ```
 
@@ -65,12 +64,65 @@ ggplot(id.respecto.pib,aes(x = anio, group=1))+
                      breaks = c("PIB Total", "Gasto I + D"),
                      values = c("red", "blue"))+
   scale_y_continuous(sec.axis = sec_axis(trans =~.*100,name = "PIB Total", labels = function(x) format(x, scientific = F)), labels = function(x) format(x, scientific = F))+
-  labs(x = "Año",y = "Gasto en I + D", title = "Gasto I + D respecto al PIB", caption = "Elaboración con datos del Banco Central y Min. Ciencia")
+  labs(x = "Año",y = "Gasto en I + D", title = "Gasto I + D respecto al PIB", caption = "Elaboración con datos del Banco Central y Min. Ciencia")+
+  theme_minimal()
+
 
 ```
 
 
 
+# 
+
+```{r}
+
+
+area<- imasd %>% 
+  group_by(factor(B2027, levels = c(1,2,3,4,5,6,7), labels = c("Cs Naturales", "Ingenieria y Tecnología", "Cs Medicas y Salud", "Cs Agricolas y Veterinarias", "Cs Sociales", "Humanidades y Arte", "Otra")),UNIDAD_DECLARANTE) %>% 
+  summarise(Total = sum(C3020, na.rm = T))
 
 
 
+options(scipen = 999999)
+
+ggplot(area, aes(`factor(...)`, Total, fill = as.factor(UNIDAD_DECLARANTE)))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+view(imasd)
+
+
+```
+
+#
+```{r}
+empresas_imasd <- imasd %>% 
+  filter(UNIDAD_DECLARANTE == 4) %>%
+  group_by(ImasD,A1019) %>% 
+  summarise(F.Ext = sum(C3107, na.rm = T), F.Nac = sum(C3100, na.rm = T)) %>% 
+  filter(ImasD == 1)
+  
+total = empresas_imasd$total
+empresas_imasd$total = total$F.Ext  
+empresas_imasd
+
+imasd_plot<-pivot_longer(empresas_imasd, c(F.Nac, F.Ext))
+
+imasd_plot
+
+
+ggplot(imasd_plot, aes(as.factor(A1019), value, fill = name))+
+  geom_col(position = "fill")
+
+
+
+
+```
+
+```{r}
+
+
+
+```
+
+3100 3107
